@@ -6,7 +6,6 @@ const cart = document.querySelector('.cart');
 const wishlistBtn = document.getElementById('wishlist');
 const goodsWrapper = document.querySelector('.goods-wrapper');
 const category = document.querySelector('.category');
-let wishlist = [];
 const cardCounter = cartBtn.querySelector('.counter');//счётчики количества товаров в корзине
 const wishlistCounter = wishlistBtn.querySelector('.counter');//счётчики количества товаров в избранных
 //spinner
@@ -15,7 +14,7 @@ const loading =  () => {
     </div><div><div></div></div><div><div></div></div><div><div></div></div></div></div></div>`
 };
 
-
+const wishlist = [];
 
 
 const createCardGoods = (id, title, price, img) => {
@@ -161,6 +160,18 @@ const checkCount = () => {
     wishlistCounter.textContent = wishlist.length;
 };
 
+//wishlist в localStorage
+const storageQuery = get => {
+    if (get){
+        if (localStorage.getItem('wishlist')){
+            JSON.parse(localStorage.getItem('wishlist')).forEach(id => wishlist.push(id));   
+        }
+    } else {
+        localStorage.setItem('wishlist', JSON.stringify(wishlist));//добавление массива в localStorage
+    }
+    checkCount();
+};
+
 const toggleWishlist = (id, elem) => {
      if (wishlist.includes(id)){
         wishlist.splice(wishlist.indexOf(id), 1);//удаление из массива если этот элемент уже там есть
@@ -170,7 +181,10 @@ const toggleWishlist = (id, elem) => {
          elem.classList.add('active');
      }
      checkCount();
-     console.log(wishlist);
+     //console.log(wishlist);
+     storageQuery();
+     
+     
 };
 
 const handlerGoods = event => {
@@ -190,8 +204,9 @@ cart.addEventListener('click', closeCart);
 category.addEventListener('click', chooseCategory);
 search.addEventListener('submit', searchGoods);
 goodsWrapper.addEventListener('click', handlerGoods);
-//wishlistBtn.addEventListener('click', )
+//wishlistBtn.addEventListener('click', );
 
 getGoods(renderCard, randomSort);
+storageQuery(true);
 
 });
