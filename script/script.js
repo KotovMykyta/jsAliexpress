@@ -53,12 +53,15 @@ const renderCard = items => {
     //удалить 3 предыдущих элемента добавленные через appendChild
     goodsWrapper.textContent = '';
     
+    if (items.length){
     //перебираем все элементы из полученного массива items, создаем карточки товаров
     items.forEach( item => {
         //console.log(item);
         const {id, title, price, imgMin} = item; //Деструктуризация
         goodsWrapper.appendChild(createCardGoods(id, title, price, imgMin));
-    })  
+    })} else{
+        goodsWrapper.textContent = 'Ooooooops! It looks like items still coming 🤷‍♂️';
+    }  
 };
 
 goodsWrapper.appendChild(createCardGoods(1, 'Дартс', 2000, "img/temp/Archer.jpg"));
@@ -117,12 +120,6 @@ const getGoods = (handler, filter) => { //handler-просто аргумент,
     
 };
 
-//повесить action на элемент иконки корзины
-cartBtn.addEventListener('click', openCart);
-
-//обработчик закрытия окна Корзина
-cart.addEventListener('click', closeCart);
-
 //метод перемешивания всех товаров через рандомную сортировку массива
 const randomSort = (items) => {
     return items.sort(() => Math.random()-0.5);//сортировка массива через рандом, запись -0.5 делает как + так и -
@@ -139,7 +136,35 @@ const chooseCategory = event => {
     }
 };
 
+const searchGoods = event => {
+     event.preventDefault();//отмена перезагрузки страницы после нажатия Enter на строке поиска
+     //console.log(event.target.elements);//колекция елементов формы поиска
+     const input = event.target.elements.searchGoods;//получение input елемента коллекции формы
+     //console.log(input.value);//получение введенной строки в поиск
+     
+     const inputValue = input.value.trim();
+     if (inputValue !== ''){
+         const searchString = new RegExp(inputValue, 'i');
+         getGoods(renderCard, goods => goods.filter(item => searchString.test(item.title)));
+     } else {
+         search.classList.add('error');//мигание рамки строки поиска при пустом запросе поиска 2сек анимация
+         setTimeout( () => {
+            search.classList.remove('error');
+         }, 2000);
+     }
+     //очистка строки поиска по выполнению
+     input.value = '';
+};
+
+//повесить action на элемент иконки корзины
+cartBtn.addEventListener('click', openCart);
+
+//обработчик закрытия окна Корзина
+cart.addEventListener('click', closeCart);
+
 category.addEventListener('click', chooseCategory);
+
+search.addEventListener('submit', searchGoods);
 
 getGoods(renderCard, randomSort);
 
