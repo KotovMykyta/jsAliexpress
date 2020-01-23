@@ -9,7 +9,11 @@ const goodsWrapper = document.querySelector('.goods-wrapper');
 
 const category = document.querySelector('.category');
 
-
+//spinner
+const loading =  () => {
+    goodsWrapper.innerHTML = `<div id="spinner"><div class="spinner-loading"><div><div><div></div>
+    </div><div><div></div></div><div><div></div></div><div><div></div></div></div></div></div>`
+};
 
 
 
@@ -54,7 +58,7 @@ const renderCard = items => {
         //console.log(item);
         const {id, title, price, imgMin} = item; //Деструктуризация
         goodsWrapper.appendChild(createCardGoods(id, title, price, imgMin));
-    })
+    })  
 };
 
 goodsWrapper.appendChild(createCardGoods(1, 'Дартс', 2000, "img/temp/Archer.jpg"));
@@ -105,10 +109,12 @@ const closeCart = (event) => {
 
 //функция которая получает товары
 const getGoods = (handler, filter) => { //handler-просто аргумент, в нашем случае renderCard
+    loading();//вызов функции вставки спиннера
     fetch('db/db.json')
     .then(response => response.json()) // возвращается промис, перевод data в массив, return дальше
     .then(filter) // функция фильтра товаров по категориям
     .then(handler);//каждый then что то return'ит
+    
 };
 
 //повесить action на элемент иконки корзины
