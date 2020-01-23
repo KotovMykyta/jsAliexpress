@@ -4,11 +4,11 @@ const search = document.querySelector('.search');
 const cartBtn = document.getElementById('cart');
 const cart = document.querySelector('.cart');
 const wishlistBtn = document.getElementById('wishlist');
-
 const goodsWrapper = document.querySelector('.goods-wrapper');
-
 const category = document.querySelector('.category');
-
+let wishlist = [];
+const cardCounter = cartBtn.querySelector('.counter');//счётчики количества товаров в корзине
+const wishlistCounter = wishlistBtn.querySelector('.counter');//счётчики количества товаров в избранных
 //spinner
 const loading =  () => {
     goodsWrapper.innerHTML = `<div id="spinner"><div class="spinner-loading"><div><div><div></div>
@@ -28,7 +28,7 @@ const createCardGoods = (id, title, price, img) => {
     card.innerHTML = `<div class="card">
                         <div class="card-img-wrapper">
                             <img class="card-img-top" src="${img}" alt="">
-                            <button class="card-add-wishlist"
+                            <button class="card-add-wishlist ${wishlist.includes(id) ? 'active' : ''}"
                                 data-goods-id="${id}"></button>
                         </div>
                         <div class="card-body justify-content-between">
@@ -144,7 +144,7 @@ const searchGoods = event => {
      
      const inputValue = input.value.trim();
      if (inputValue !== ''){
-         const searchString = new RegExp(inputValue, 'i');
+         const searchString = new RegExp(inputValue, 'i');// 'i' не учитывает регистр
          getGoods(renderCard, goods => goods.filter(item => searchString.test(item.title)));
      } else {
          search.classList.add('error');//мигание рамки строки поиска при пустом запросе поиска 2сек анимация
@@ -156,15 +156,41 @@ const searchGoods = event => {
      input.value = '';
 };
 
+//счётчик колличества товаров в избранном
+const checkCount = () => {
+    wishlistCounter.textContent = wishlist.length;
+};
+
+const toggleWishlist = (id, elem) => {
+     if (wishlist.includes(id)){
+        wishlist.splice(wishlist.indexOf(id), 1);//удаление из массива если этот элемент уже там есть
+        elem.classList.remove('active');
+     } else {
+         wishlist.push(id);
+         elem.classList.add('active');
+     }
+     checkCount();
+     console.log(wishlist);
+};
+
+const handlerGoods = event => {
+    const target = event.target;
+    //console.log('target: ', target);//получение таргета по клику
+    if (target.classList.contains('card-add-wishlist')){
+        toggleWishlist(target.dataset.goodsId, target);
+    }
+    
+};
+
 //повесить action на элемент иконки корзины
 cartBtn.addEventListener('click', openCart);
 
 //обработчик закрытия окна Корзина
 cart.addEventListener('click', closeCart);
-
 category.addEventListener('click', chooseCategory);
-
 search.addEventListener('submit', searchGoods);
+goodsWrapper.addEventListener('click', handlerGoods);
+//wishlistBtn.addEventListener('click', )
 
 getGoods(renderCard, randomSort);
 
