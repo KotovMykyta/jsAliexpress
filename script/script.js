@@ -196,15 +196,19 @@ const handlerGoods = event => {
     
 };
 
+//отображение избранных товаров по клику на кнопку сердечко
+const showWishlist = () => {
+    getGoods(renderCard, goods => goods.filter(item => wishlist.includes(item.id)));
+};
+
 //повесить action на элемент иконки корзины
 cartBtn.addEventListener('click', openCart);
-
 //обработчик закрытия окна Корзина
 cart.addEventListener('click', closeCart);
 category.addEventListener('click', chooseCategory);
 search.addEventListener('submit', searchGoods);
 goodsWrapper.addEventListener('click', handlerGoods);
-//wishlistBtn.addEventListener('click', );
+wishlistBtn.addEventListener('click', showWishlist);
 
 getGoods(renderCard, randomSort);
 storageQuery(true);
