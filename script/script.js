@@ -10,11 +10,18 @@ const cardCounter = cartBtn.querySelector('.counter');//счётчики кол�
 const wishlistCounter = wishlistBtn.querySelector('.counter');//счётчики количества товаров в избранных
 const cartWrapper = document.querySelector('.cart-wrapper');//корзина оболочка
 //spinner
-const loading =  () => {
-    goodsWrapper.innerHTML = `<div id="spinner"><div class="spinner-loading"><div><div><div></div>
-    </div><div><div></div></div><div><div></div></div><div><div></div></div></div></div></div>`
+const loading = (nameFunction) => {
+    const spinner = `<div id="spinner"><div class="spinner-loading"><div><div><div></div>
+    </div><div><div></div></div><div><div></div></div><div><div></div></div></div></div></div>`;
+    //console.log(nameFunction);
+    if(nameFunction === 'renderCard'){
+        goodsWrapper.innerHTML = spinner;
+    }
+    if(nameFunction === 'renderBasket'){
+        cartWrapper.innerHTML = spinner; 
+    }
 };
-
+ 
 const wishlist = [];
 let goodsBasket = {};
 
@@ -83,7 +90,7 @@ const createCardGoodsBasket = (id, title, price, img) => {
                 data-goods-id="${id}"></button>
             <button class="goods-delete" data-goods-id="${id}" ></button>
         </div>
-        <div class="goods-count">1</div>
+        <div class="goods-count">${goodsBasket[id]}</div>
     </div>`;
 
     return card;
@@ -96,7 +103,7 @@ const renderBasket  = items => {
         const {id, title, price, imgMin} = item;
         cartWrapper.appendChild(createCardGoodsBasket(id, title, price, imgMin));
     })} else{
-        cartWrapper.innerHTML = '<div id="cart-empty">Ваша корзина ыыы пока пуста</div>';
+        cartWrapper.innerHTML = '<div id="cart-empty">Ooooooops! It looks like you didn\'t makes any orders 🤷‍♂️</div>';
     }  
 };
  
@@ -105,7 +112,19 @@ goodsWrapper.appendChild(createCardGoods(1, 'Дартс', 2000, "img/temp/Archer
 goodsWrapper.appendChild(createCardGoods(2, 'Фламинго', 1488, "img/temp/Flamingo.jpg"));
 goodsWrapper.appendChild(createCardGoods(3, 'Носки', 40, "img/temp/Socks.jpg"));
 
-const showCardBasket = goods => goods.filter(item => goodsBasket.hasOwnProperty(item.id));
+const carcTotalPrice = goods => {
+    let sum = 0;
+    for (const item of goods){
+        sum += item.price * goodsBasket[item.id];//console.log(item);
+    }
+    cart.querySelector('.cart-total>span').textContent = sum.toFixed(2);
+};
+
+const showCardBasket = goods => {
+    const basketGoods = goods.filter(item => goodsBasket.hasOwnProperty(item.id));
+    carcTotalPrice(basketGoods);
+    return basketGoods;
+}
 
 //функция обработчик нажатия корзины
 const openCart = (event) => {
@@ -150,7 +169,7 @@ const closeCart = (event) => {
 
 //функция которая получает товары
 const getGoods = (handler, filter) => { //handler-просто аргумент, в нашем случае renderCard
-    //loading();//вызов функции вставки спиннера
+    loading(handler.name);//вызов функции вставки спиннера
     fetch('db/db.json')
     .then(response => response.json()) // возвращается промис, перевод data в массив, return дальше
     .then(filter) // функция фильтра товаров по категориям
@@ -200,13 +219,16 @@ const searchGoods = event => {
 const getCookie = name => {
     let matches = document.cookie.match(new RegExp(
       "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
-    ));
+    )); 
     return matches ? decodeURIComponent(matches[1]) : undefined;
 }
 
 const cookieQuery = get => {
     if (get){
-        goodsBasket = JSON.parse(getCookie('goodsBasket'));
+        if (getCookie('goodsBasket')){
+            Object.assign(goodsBasket, JSON.parse(getCookie('goodsBasket')));
+            //goodsBasket = JSON.parse(getCookie('goodsBasket'));
+        }
         checkCount(); 
     } else{
         document.cookie = `goodsBasket=${JSON.stringify(goodsBasket)}; max-age=86400e3`;
@@ -224,8 +246,11 @@ const checkCount = () => {
 const storageQuery = get => {
     if (get){
         if (localStorage.getItem('wishlist')){
-            JSON.parse(localStorage.getItem('wishlist')).forEach(id => wishlist.push(id));
+            wishlist.push(...JSON.parse(localStorage.getItem('wishlist')));
+            //wishlist.splice(Infinity, 0, ...JSON.parse(localStorage.getItem('wishlist')));
+            //JSON.parse(localStorage.getItem('wishlist')).forEach(id => wishlist.push(id));
             checkCount();
+            //console.log(wishlist);
         }
     } else {
         localStorage.setItem('wishlist', JSON.stringify(wishlist));//добавление массива в localStorage
